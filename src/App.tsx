@@ -1,70 +1,58 @@
-import { useEffect, useState } from "react"
-import { supabase } from "./supabase"
+import { useEffect, useState } from "react";
+import { supabase } from "./supabase";
+
+type Todo = {
+  id: string;
+  title: string;
+  created_at: string;
+};
 
 export default function App() {
-  const [todos, setTodos] = useState([])
-  const [title, setTitle] = useState("")
+  const [todos, setTodos] = useState<Todo[]>([]);
+  const [title, setTitle] = useState("");
 
   useEffect(() => {
-    fetchTodos()
-  }, [])
+    fetchTodos();
+  }, []);
 
   async function fetchTodos() {
     const { data, error } = await supabase
       .from("todos")
-      .select("*")
-      .order("created_at", { ascending: false })
+      .select("*");
 
-    if (!error) setTodos(data)
+    if (!error && data) {
+      setTodos(data as Todo[]);
+    }
   }
 
-  // CREATE
   async function addTodo() {
-    if (!title) return
-    await supabase.from("todos").insert({ title })
-    setTitle("")
-    fetchTodos()
-  }
+    if (!title) return;
 
-  // UPDATE
-  async function updateTodo(id) {
-    const newTitle = prompt("New title:")
-    if (!newTitle) return
-
-    await supabase
+    const { error } = await supabase
       .from("todos")
-      .update({ title: newTitle })
-      .eq("id", id)
+      .insert([{ title }]);
 
-    fetchTodos()
-  }
-
-  // DELETE
-  async function deleteTodo(id) {
-    await supabase.from("todos").delete().eq("id", id)
-    fetchTodos()
+    if (!error) {
+      setTitle("");
+      fetchTodos();
+    }
   }
 
   return (
-    <div style={{ padding: 20 }}>
-      <h2>Supabase CRUD App</h2>
+    <div>
+      <h1>Vite + Supabase CRUD</h1>
 
       <input
         value={title}
         onChange={(e) => setTitle(e.target.value)}
-        placeholder="New todo"
       />
       <button onClick={addTodo}>Add</button>
 
       <ul>
-        {todos.map((todo) => (
-          <li key={todo.id}>
-            {todo.title}
-            <button onClick={() => updateTodo(todo.id)}>✏️</button>
-            <button onClick={() => deleteTodo(todo.id)}>❌</button>
-          </li>
+        {todos.map((t) => (
+          <li key={t.id}>{t.title}</li>
         ))}
       </ul>
     </div>
-  )
+  );
 }
