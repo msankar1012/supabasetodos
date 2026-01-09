@@ -44,7 +44,7 @@ export default function App() {
 
   return (
     <div style={{ padding: 20 }}>
-      <h1>Vite + Supabase CRUD</h1>
+      <h1>Supabase Todo List</h1>
       <input value={title} onChange={e => setTitle(e.target.value)} placeholder="New todo" />
       <button onClick={addTodo}>Add</button>
       <ul>
